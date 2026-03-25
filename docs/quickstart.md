@@ -1,0 +1,116 @@
+# 🚀 Guia de Início Rápido
+
+## Sua Primeira Transcrição
+
+### Via Interface Gráfica
+
+1. **Iniciar aplicação**:
+   ```bash
+   python main.py
+   ```
+
+2. **Selecionar arquivo**: 
+   - Clique em "Selecionar Arquivo" ou
+   - Arraste e solte o arquivo na janela
+
+3. **Configurar** (opcional):
+   - Modelo: `small` (balanceado) ou `large-v3` (máxima qualidade)
+   - Idioma: `auto` detecta automaticamente
+
+4. **Transcrever**: 
+   - Clique em "Iniciar Transcrição"
+   - Aguarde o processamento
+
+5. **Exportar**:
+   - Clique em "Salvar" para TXT
+   - Ou "Exportar" para outros formatos
+
+### Via Linha de Comando
+
+```bash
+# Transcrição simples
+python -m speech_scribe.cli transcribe audio.mp3
+
+# Com modelo específico e idioma
+python -m speech_scribe.cli transcribe audio.mp3 -m large-v3 -l pt
+
+# Exportar como SRT (legendas)
+python -m speech_scribe.cli transcribe video.mp4 -f srt -o legendas.srt
+
+# Múltiplos arquivos
+python -m speech_scribe.cli transcribe *.mp3 -o resultados/
+```
+
+## Análise de Texto
+
+Após a transcrição, você pode analisar o texto:
+
+### Interface Gráfica
+1. Vá para a aba "Análise"
+2. Selecione as análises desejadas
+3. Clique em "Analisar"
+
+### Linha de Comando
+```bash
+# Todas as análises
+python -m speech_scribe.cli analyze texto.txt --all
+
+# Análises específicas
+python -m speech_scribe.cli analyze texto.txt --sentiment --keywords --summary
+
+# Saída em JSON
+python -m speech_scribe.cli analyze texto.txt --all --json
+```
+
+## Diarização (Múltiplos Oradores)
+
+Para identificar diferentes oradores:
+
+1. Configure o token HuggingFace (ver instalação)
+2. Na interface, marque "Habilitar Diarização"
+3. Ou na CLI:
+   ```bash
+   python -m speech_scribe.cli transcribe reuniao.mp3 --diarize
+   ```
+
+## Exemplos Práticos
+
+### Transcrever Podcast
+```bash
+python -m speech_scribe.cli transcribe podcast.mp3 -m medium -l pt --diarize -f json -o podcast_transcrito.json
+```
+
+### Legendar Vídeo
+```bash
+python -m speech_scribe.cli transcribe video.mp4 -m small -l auto -f srt -o video.srt
+```
+
+### Processar Pasta Inteira
+```bash
+python -m speech_scribe.cli batch audios/*.mp3 -m small -o transcritos/ -w 4
+```
+
+### Gerar Relatório de Reunião
+```bash
+# Transcrever
+python -m speech_scribe.cli transcribe reuniao.mp3 --diarize -o reuniao.txt
+
+# Analisar
+python -m speech_scribe.cli analyze reuniao.txt --summary --keywords --topics -o relatorio.json
+```
+
+## Dicas de Performance
+
+| Cenário | Modelo Recomendado | Dispositivo |
+|---------|-------------------|-------------|
+| Transcrição rápida | `tiny` ou `base` | CPU |
+| Uso geral | `small` | GPU/CPU |
+| Alta qualidade | `medium` | GPU |
+| Máxima precisão | `large-v3` | GPU (8GB+) |
+
+## Próximos Passos
+
+- [Referência da CLI](cli.md)
+- [Criar Plugins](plugins.md)
+- [Detecção de GPU](gpu_detection.md)
+- [Guia de Instalação](installation.md)

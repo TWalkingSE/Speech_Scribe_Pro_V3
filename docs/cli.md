@@ -1,0 +1,251 @@
+# 🖥️ Referência da CLI
+
+## Uso Geral
+
+```bash
+python -m speech_scribe.cli [opções] <comando> [argumentos]
+```
+
+## Opções Globais
+
+| Opção | Descrição |
+|-------|-----------|
+| `--version, -V` | Mostra versão |
+| `--verbose, -v` | Modo verboso |
+| `--quiet, -q` | Modo silencioso |
+| `--json` | Saída em JSON |
+| `--help, -h` | Mostra ajuda |
+
+## Comandos
+
+### transcribe (t)
+
+Transcreve arquivos de áudio/vídeo.
+
+```bash
+python -m speech_scribe.cli transcribe <arquivos> [opções]
+```
+
+**Argumentos:**
+- `arquivos`: Um ou mais arquivos (suporta glob: `*.mp3`)
+
+**Opções:**
+
+| Opção | Padrão | Descrição |
+|-------|--------|-----------|
+| `-m, --model` | `small` | Modelo Whisper |
+| `-l, --language` | `auto` | Idioma do áudio |
+| `-o, --output` | - | Diretório/arquivo de saída |
+| `-f, --format` | `txt` | Formato: txt, json, srt, vtt |
+| `--diarize` | - | Habilitar diarização |
+| `--timestamps` | - | Incluir timestamps |
+| `--device` | `auto` | Dispositivo: auto, cpu, cuda |
+
+**Exemplos:**
+
+```bash
+# Básico
+python -m speech_scribe.cli t audio.mp3
+
+# Com opções
+python -m speech_scribe.cli t video.mp4 -m large-v3 -l pt -f srt -o legendas/
+
+# Múltiplos arquivos
+python -m speech_scribe.cli t *.mp3 -o transcritos/
+
+# Com diarização
+python -m speech_scribe.cli t reuniao.mp3 --diarize --timestamps
+```
+
+---
+
+### analyze (a)
+
+Analisa texto transcrito.
+
+```bash
+python -m speech_scribe.cli analyze <arquivo> [opções]
+```
+
+**Argumentos:**
+- `arquivo`: Arquivo de texto para analisar
+
+**Opções:**
+
+| Opção | Descrição |
+|-------|-----------|
+| `--sentiment` | Análise de sentimento |
+| `--keywords` | Extração de palavras-chave |
+| `--entities` | Extração de entidades |
+| `--summary` | Gerar resumo |
+| `--topics` | Identificar tópicos |
+| `--all` | Todas as análises |
+| `--ollama` | Usar Ollama para IA |
+| `--ollama-model` | Modelo Ollama |
+| `-o, --output` | Arquivo de saída |
+
+**Exemplos:**
+
+```bash
+# Análise completa
+python -m speech_scribe.cli a texto.txt --all
+
+# Análises específicas
+python -m speech_scribe.cli a texto.txt --sentiment --keywords
+
+# Com Ollama
+python -m speech_scribe.cli a texto.txt --all --ollama --ollama-model llama3.2:3b
+
+# Saída JSON
+python -m speech_scribe.cli a texto.txt --all --json -o analise.json
+```
+
+---
+
+### batch (b)
+
+Processa múltiplos arquivos em paralelo.
+
+```bash
+python -m speech_scribe.cli batch <arquivos> [opções]
+```
+
+**Opções:**
+
+| Opção | Padrão | Descrição |
+|-------|--------|-----------|
+| `-m, --model` | `small` | Modelo Whisper |
+| `-l, --language` | `auto` | Idioma |
+| `-o, --output` | - | Diretório de saída |
+| `-w, --workers` | `2` | Workers paralelos |
+| `--analyze` | - | Analisar após transcrever |
+
+**Exemplos:**
+
+```bash
+# Batch simples
+python -m speech_scribe.cli b audios/*.mp3 -o resultados/
+
+# Com 4 workers
+python -m speech_scribe.cli b *.mp3 -w 4 -m medium
+
+# Com análise
+python -m speech_scribe.cli b *.mp3 --analyze -o processados/
+```
+
+---
+
+### status (s)
+
+Verifica status do sistema.
+
+```bash
+python -m speech_scribe.cli status [opções]
+```
+
+**Opções:**
+
+| Opção | Descrição |
+|-------|-----------|
+| `--hardware` | Info de hardware |
+| `--dependencies` | Verificar dependências |
+| `--ollama` | Status do Ollama |
+| `--all` | Mostrar tudo |
+
+**Exemplos:**
+
+```bash
+# Status completo
+python -m speech_scribe.cli s --all
+
+# Apenas hardware
+python -m speech_scribe.cli s --hardware
+
+# JSON para scripts
+python -m speech_scribe.cli s --all --json
+```
+
+---
+
+### config (c)
+
+Gerencia configurações.
+
+```bash
+python -m speech_scribe.cli config <ação> [opções]
+```
+
+**Ações:**
+
+| Ação | Descrição |
+|------|-----------|
+| `show` | Mostra configurações |
+| `set` | Define valor |
+| `reset` | Reseta para padrões |
+| `export` | Exporta para arquivo |
+| `import` | Importa de arquivo |
+
+**Opções:**
+
+| Opção | Descrição |
+|-------|-----------|
+| `--key` | Chave de configuração |
+| `--value` | Valor para definir |
+| `--file` | Arquivo para import/export |
+
+**Exemplos:**
+
+```bash
+# Ver configurações
+python -m speech_scribe.cli c show
+
+# Definir valor
+python -m speech_scribe.cli c set --key transcription.model_size --value medium
+
+# Exportar
+python -m speech_scribe.cli c export --file config_backup.json
+
+# Resetar
+python -m speech_scribe.cli c reset
+```
+
+## Códigos de Saída
+
+| Código | Significado |
+|--------|-------------|
+| `0` | Sucesso |
+| `1` | Erro geral |
+| `130` | Cancelado pelo usuário (Ctrl+C) |
+
+## Integração com Scripts
+
+### Bash
+
+```bash
+#!/bin/bash
+for file in audios/*.mp3; do
+    python -m speech_scribe.cli t "$file" -o transcritos/ --json
+done
+```
+
+### PowerShell
+
+```powershell
+Get-ChildItem *.mp3 | ForEach-Object {
+    python -m speech_scribe.cli t $_.FullName -o transcritos/ --json
+}
+```
+
+### Python
+
+```python
+import subprocess
+import json
+
+result = subprocess.run(
+    ['python', '-m', 'speech_scribe.cli', 'status', '--all', '--json'],
+    capture_output=True, text=True
+)
+status = json.loads(result.stdout)
+print(f"GPU disponível: {status['hardware']['cuda_functional']}")
+```
