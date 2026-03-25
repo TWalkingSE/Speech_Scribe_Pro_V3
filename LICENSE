@@ -136,53 +136,58 @@ third-party component.
 Este projeto incorpora várias bibliotecas e componentes de terceiros,
 cada um com seus próprios termos de licenciamento:
 
-1. OpenAI Whisper
+1. faster-whisper
    Licença: Licença MIT
-   Copyright (c) 2022 OpenAI
-   Repositório: https://github.com/openai/whisper
+   Copyright (c) 2023 SYSTRAN
+   Repositório: https://github.com/SYSTRAN/faster-whisper
 
-2. PyQt5
+2. PyQt6
    Licença: GPL v3 / Licença Comercial
    Copyright (c) Riverbank Computing Limited
    Website: https://riverbankcomputing.com/software/pyqt/
-   Nota: Este projeto usa PyQt5 sob os termos GPL v3
+   Nota: Este projeto usa PyQt6 sob os termos GPL v3
 
 3. PyTorch
    Licença: Licença BSD 3-Cláusulas
-   Copyright (c) 2016-2023 Facebook, Inc (Meta Platforms)
+   Copyright (c) 2016-2026 Meta Platforms, Inc
    Repositório: https://github.com/pytorch/pytorch
 
 4. pyannote.audio
    Licença: Licença MIT
-   Copyright (c) 2017-2023 CNRS
+   Copyright (c) 2017-2026 CNRS
    Repositório: https://github.com/pyannote/pyannote-audio
 
 5. NumPy
    Licença: Licença BSD 3-Cláusulas
-   Copyright (c) 2005-2023 Desenvolvedores NumPy
+   Copyright (c) 2005-2026 Desenvolvedores NumPy
    Repositório: https://github.com/numpy/numpy
 
 6. SciPy
    Licença: Licença BSD 3-Cláusulas
-   Copyright (c) 2001-2023 Desenvolvedores SciPy
+   Copyright (c) 2001-2026 Desenvolvedores SciPy
    Repositório: https://github.com/scipy/scipy
 
 7. librosa
    Licença: Licença ISC
-   Copyright (c) 2013-2023 equipe de desenvolvimento librosa
+   Copyright (c) 2013-2026 equipe de desenvolvimento librosa
    Repositório: https://github.com/librosa/librosa
 
-8. soundfile
-   Licença: Licença BSD 3-Cláusulas
-   Copyright (c) 2013-2023 Bastian Bechtold
-   Repositório: https://github.com/bastibe/python-soundfile
+8. deep-translator
+   Licença: Licença MIT
+   Copyright (c) 2020 Nidhal Baccouri
+   Repositório: https://github.com/nidhaloff/deep-translator
 
-9. requests
-   Licença: Licença Apache 2.0
-   Copyright (c) 2019 Kenneth Reitz
-   Repositório: https://github.com/psf/requests
+9. python-docx
+   Licença: Licença MIT
+   Copyright (c) 2013 Steve Canny
+   Repositório: https://github.com/python-openxml/python-docx
 
-10. python-dotenv
+10. httpx
+    Licença: Licença BSD 3-Cláusulas
+    Copyright (c) 2019 Encode OSS Ltd
+    Repositório: https://github.com/encode/httpx
+
+11. python-dotenv
     Licença: Licença BSD 3-Cláusulas
     Copyright (c) 2014 Saurabh Kumar
     Repositório: https://github.com/theskumar/python-dotenv
@@ -192,12 +197,12 @@ A lista acima pode não ser exaustiva. Os usuários são encorajados a revisar
 a árvore completa de dependências e licenças associadas antes de usar este
 software em ambientes comerciais ou de produção.
 
-Para PyQt5 especificamente: Se você planeja distribuir este software comercialmente
+Para PyQt6 especificamente: Se você planeja distribuir este software comercialmente
 ou de forma fechada, pode ser necessário obter uma licença comercial da
 Riverbank Computing Limited.
 
 CONFORMIDADE GPL:
-Como este projeto usa PyQt5 sob GPL v3, todo o projeto está sujeito aos
+Como este projeto usa PyQt6 sob GPL v3, todo o projeto está sujeito aos
 termos GPL v3 quando distribuído. A licença MIT acima se aplica apenas ao
 código original escrito especificamente para Speech Scribe Pro V3, excluindo
 dependências de terceiros.
