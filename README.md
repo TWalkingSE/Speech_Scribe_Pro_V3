@@ -14,6 +14,9 @@
 
 Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de áudio/vídeo, construída com Python, PyQt6 e modelos Whisper via `faster-whisper`. Funciona offline, roda na sua GPU NVIDIA (ou CPU), e oferece uma suíte de recursos avançados numa interface gráfica moderna.
 
+![WhatsApp Image 2026-03-27 at 14 36 42](https://github.com/user-attachments/assets/4b386209-2d8e-4b2f-9642-1b3166ad5dd9)
+
+
 **Stack principal:** Python 3.12 · PyQt6 · faster-whisper · PyTorch CUDA · pyannote.audio · Ollama
 
 ---
