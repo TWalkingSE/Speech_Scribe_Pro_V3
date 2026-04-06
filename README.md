@@ -14,7 +14,12 @@
 
 Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de áudio/vídeo, construída com Python, PyQt6 e modelos Whisper via `faster-whisper`. Funciona offline, roda na sua GPU NVIDIA (ou CPU), e oferece uma suíte de recursos avançados numa interface gráfica moderna.
 
-![WhatsApp Image 2026-03-27 at 14 36 42](https://github.com/user-attachments/assets/4b386209-2d8e-4b2f-9642-1b3166ad5dd9)
+
+<img width="2147" height="1062" alt="image" src="https://github.com/user-attachments/assets/ea90c2ef-afe9-4047-8d26-29cf0a26d89d" />
+
+
+<img width="2132" height="1047" alt="image" src="https://github.com/user-attachments/assets/a89b5454-0d75-47ab-83f8-62f3c07b000f" />
+
 
 
 **Stack principal:** Python 3.12 · PyQt6 · faster-whisper · PyTorch CUDA · pyannote.audio · Ollama
@@ -38,8 +43,13 @@ Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de �
 
 ### 🧠 Análise com IA
 - **Análise básica**: sentimento, entidades, palavras-chave, resumo, tópicos
-- **Ollama** (IA local): análise completa, resumo executivo, pontos de ação
-- **Chat interativo**: converse com a IA sobre a transcrição usando modelos locais
+- **Ollama** (IA local): análise completa, resumo executivo, pontos de ação e correção de texto
+- **Execução otimizada em GPU**: usa `num_gpu=-1` com contexto seguro automático (`num_ctx`) para evitar split CPU/GPU quando possível
+- **Seleção dinâmica de modelos**: todos os modelos instalados no Ollama ficam disponíveis para o usuário escolher
+- **Modo Auto**: prioriza modelos compatíveis com a VRAM disponível, mantendo a escolha manual do usuário quando selecionada
+- **Análise em thread separada**: não trava a interface durante processamento com Ollama
+- **Correção de texto robusta**: retry automático, limpeza do output e fallback quando o modelo devolve resposta vazia
+- **Chat interativo**: converse com a IA sobre a transcrição usando qualquer modelo local instalado
 
 ### 🌐 Tradução Integrada
 - Tradução automática para **30+ idiomas** via `deep-translator`
@@ -94,7 +104,7 @@ Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de �
 - **Exportação completa** em JSON ou CSV
 
 ### Persistência de Configurações
-- Modelo, idioma, preset, tema, volume e geometria da janela salvos automaticamente
+- Modelo de transcrição, modelo Ollama, idioma, preset, tema, volume e geometria da janela salvos automaticamente
 - Restauração automática ao reabrir a aplicação
 - Baseado em `QSettings` (registro do Windows / plist no macOS)
 
@@ -285,9 +295,32 @@ tests/                               # Testes automatizados
 | large-v2 | ~10 GB | Muito lento | Muito alta |
 | large-v3 | ~10 GB | Muito lento | Máxima |
 
+### Modelos Ollama (Análise com IA Local)
+
+A análise com IA usa o Ollama com **prioridade máxima de GPU** (`num_gpu=-1`) e um **contexto seguro automático** para evitar cargas desnecessárias em CPU. Em GPUs de 16 GB, um contexto muito alto no Ollama pode inflar o uso total do modelo e causar split CPU/GPU, mesmo quando o modelo em si cabe na VRAM. O aplicativo agora reduz o `num_ctx` automaticamente e o modo Auto prioriza modelos que cabem com folga na VRAM.
+
+| GPU VRAM | Faixa prática para análise local | Exemplos |
+|----------|----------------------------------|----------|
+| 6 GB | Modelos pequenos ou quantizados até ~4-6 GB | `qwen2.5:3b`, `phi3:mini` |
+| 8 GB | Modelos até ~7-8 GB em disco | `llama3.1:8b`, `qwen2.5:7b` |
+| 16 GB | Modelos até ~12-14 GB em disco com `num_ctx` controlado | `qwen3.5:9b-q8_0`, `gpt-oss:20b`, `deepseek-r1:14b-qwen-distill-q8_0` |
+| 24 GB | Modelos médios/grandes com mais folga para contexto | `gpt-oss:20b`, `codellama:34b-q4` |
+| 32 GB+ | Modelos grandes e contextos mais altos | 20B+ e quantizações maiores |
+
+> **Notas:**
+> - Todos os modelos instalados no Ollama aparecem automaticamente na interface.
+> - `100% GPU` só acontece quando **modelo + cache de contexto** cabem na VRAM disponível.
+> - O aplicativo exibe na interface o processador efetivo (`CPU/GPU`) e o `ctx` carregado pelo Ollama.
+> - Em testes locais, `qwen3.5:9b-q8_0` em 16 GB ficou `100% GPU` com `num_ctx=8192`, enquanto contextos muito altos faziam o modelo subir para ~25 GB e dividir CPU/GPU.
+
 ---
 
 ## Notas Técnicas
+
+### Ollama, VRAM e Contexto
+- O app descarrega e recarrega o modelo do Ollama antes da análise para aplicar as opções de GPU corretamente.
+- O status real do modelo é lido de `/api/ps`, incluindo `size_vram` e `context_length`.
+- A revisão de texto agora pede somente a transcrição corrigida e tenta novamente com um prompt mais restrito se o modelo retornar vazio.
 
 ### Migração PyQt5 → PyQt6
 O projeto foi migrado de PyQt5 para PyQt6. Mudanças principais:
