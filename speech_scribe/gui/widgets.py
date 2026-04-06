@@ -147,6 +147,7 @@ class ModernUIBuilder:
         """Cria seletor de arquivo moderno com drag & drop"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
+        layout.setSpacing(12)
         
         # Campo de arquivo
         file_edit = QLineEdit()
@@ -155,7 +156,9 @@ class ModernUIBuilder:
         
         # Botão de seleção
         select_btn = QPushButton("📁 Selecionar")
-        select_btn.setMaximumWidth(100)
+        select_btn.setMinimumWidth(136)
+        select_btn.setMaximumWidth(160)
+        select_btn.setMinimumHeight(38)
         
         # Área de arrastar e soltar (usando classe customizada)
         drop_label = DropLabel("Ou arraste arquivos aqui")

@@ -86,7 +86,7 @@ except ImportError:
 
 if PyQt6_available:
     from speech_scribe.gui.widgets import DropLabel, ModernUIBuilder
-    from speech_scribe.gui.threads import TranscriptionThread
+    from speech_scribe.gui.threads import TranscriptionThread, AnalysisThread
     
     # Importar módulos opcionais de GUI
     try:
@@ -494,26 +494,21 @@ if PyQt6_available:
             tab = QWidget()
             layout = QVBoxLayout(tab)
 
-            # Opções de análise
-            options_group = QGroupBox("Opções de Análise")
+            # Opções de análise básica (sem IA)
+            options_group = QGroupBox("📊 Análise Básica (Local)")
             options_layout = QGridLayout(options_group)
 
-            self.sentiment_check = QCheckBox("Análise de Sentimento")
-            self.entities_check = QCheckBox("Extração de Entidades")
             self.keywords_check = QCheckBox("Palavras-chave")
             self.summary_check = QCheckBox("Resumo Automático")
+            self.entities_check = QCheckBox("Extração de Entidades")
             self.topics_check = QCheckBox("Identificação de Tópicos")
+            self.sentiment_check = QCheckBox("Análise de Sentimento")
 
-            # Marcar todas por padrão
-            for check in [self.sentiment_check, self.entities_check,
-                         self.keywords_check, self.summary_check, self.topics_check]:
-                check.setChecked(True)
-
-            options_layout.addWidget(self.sentiment_check, 0, 0)
-            options_layout.addWidget(self.entities_check, 0, 1)
-            options_layout.addWidget(self.keywords_check, 1, 0)
-            options_layout.addWidget(self.summary_check, 1, 1)
-            options_layout.addWidget(self.topics_check, 2, 0)
+            options_layout.addWidget(self.keywords_check, 0, 0)
+            options_layout.addWidget(self.summary_check, 0, 1)
+            options_layout.addWidget(self.entities_check, 1, 0)
+            options_layout.addWidget(self.topics_check, 1, 1)
+            options_layout.addWidget(self.sentiment_check, 2, 0)
 
             # Opções Ollama
             ollama_group = QGroupBox("🤖 Análise com Ollama (IA Local)")
@@ -522,19 +517,33 @@ if PyQt6_available:
             self.use_ollama_check = QCheckBox("Usar análise Ollama")
             ollama_layout.addWidget(self.use_ollama_check)
 
+            # Tipos de análise Ollama
+            ollama_types_layout = QGridLayout()
+            self.ollama_general_check = QCheckBox("Análise Geral")
+            self.ollama_summary_check = QCheckBox("Resumo Inteligente")
+            self.ollama_sentiment_check = QCheckBox("Análise de Sentimento")
+            self.ollama_keywords_check = QCheckBox("Extração de Palavras-chave")
+            self.ollama_correction_check = QCheckBox("Correção de Texto")
+            self.ollama_reasoning_check = QCheckBox("Raciocínio Profundo")
+
+            ollama_types_layout.addWidget(self.ollama_general_check, 0, 0)
+            ollama_types_layout.addWidget(self.ollama_summary_check, 0, 1)
+            ollama_types_layout.addWidget(self.ollama_sentiment_check, 1, 0)
+            ollama_types_layout.addWidget(self.ollama_keywords_check, 1, 1)
+            ollama_types_layout.addWidget(self.ollama_correction_check, 2, 0)
+            ollama_types_layout.addWidget(self.ollama_reasoning_check, 2, 1)
+
+            ollama_layout.addLayout(ollama_types_layout)
+
             # Seleção de modelo Ollama
             model_layout = QHBoxLayout()
             model_layout.addWidget(QLabel("Modelo:"))
             self.ollama_model_combo = QComboBox()
-            # Apenas os dois modelos configurados para análise
-            self.ollama_model_combo.addItems([
-                "Auto (Melhor Disponível)",
-                "gpt-oss:20b",
-                "deepseek-r1:14b-qwen-distill-q8_0"
-            ])
+            # Modelo Auto + modelos serão carregados dinamicamente
+            self.ollama_model_combo.addItem("Auto (Melhor Disponível)")
             self.ollama_model_combo.setToolTip(
-                "GPT-OSS: Análises gerais, resumos, keywords\n"
-                "DeepSeek R1: Raciocínio profundo, sentimento, Q&A"
+                "Selecione um modelo Ollama para análise.\n"
+                "Clique em 🔄 para atualizar a lista de modelos disponíveis."
             )
             model_layout.addWidget(self.ollama_model_combo)
 
@@ -1321,7 +1330,7 @@ if PyQt6_available:
         # ================================
 
         def _start_analysis(self):
-            """Inicia análise da transcrição"""
+            """Inicia análise da transcrição em thread separada"""
             try:
                 if not self.transcription_result:
                     QMessageBox.warning(self, "Aviso", "Faça uma transcrição primeiro!")
@@ -1332,51 +1341,100 @@ if PyQt6_available:
                     QMessageBox.warning(self, "Aviso", "Texto da transcrição está vazio!")
                     return
 
-                progress_dialog = QProgressDialog("Analisando transcrição com IA...", "Cancelar", 0, 100, self)
-                progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
-                progress_dialog.setAutoClose(True)
-                progress_dialog.setAutoReset(True)
-                progress_dialog.show()
+                # Coletar análises básicas selecionadas
+                basic_analyses = []
+                if self.sentiment_check.isChecked():
+                    basic_analyses.append('sentiment')
+                if self.entities_check.isChecked():
+                    basic_analyses.append('entities')
+                if self.keywords_check.isChecked():
+                    basic_analyses.append('keywords')
+                if self.summary_check.isChecked():
+                    basic_analyses.append('summary')
+                if self.topics_check.isChecked():
+                    basic_analyses.append('topics')
 
-                progress_dialog.setValue(20)
-                QApplication.processEvents()
+                # Coletar tipos de análise Ollama selecionados
+                ollama_types = []
+                if self.use_ollama_check.isChecked():
+                    if self.ollama_general_check.isChecked():
+                        ollama_types.append('general')
+                    if self.ollama_summary_check.isChecked():
+                        ollama_types.append('summary')
+                    if self.ollama_sentiment_check.isChecked():
+                        ollama_types.append('sentiment')
+                    if self.ollama_keywords_check.isChecked():
+                        ollama_types.append('keywords')
+                    if self.ollama_correction_check.isChecked():
+                        ollama_types.append('correction')
+                    if self.ollama_reasoning_check.isChecked():
+                        ollama_types.append('reasoning')
 
-                basic_analyses = ['sentiment', 'entities', 'keywords', 'summary', 'topics']
-                analysis_results = self.analyzer.analyze_transcription(transcription_text, basic_analyses)
+                if not basic_analyses and not ollama_types:
+                    QMessageBox.warning(self, "Aviso", "Selecione pelo menos uma opção de análise!")
+                    return
 
-                progress_dialog.setValue(60)
-                QApplication.processEvents()
+                # Modelo Ollama selecionado
+                selected_model = None
+                if ollama_types:
+                    model_text = self.ollama_model_combo.currentText()
+                    if model_text != "Auto (Melhor Disponível)":
+                        selected_model = model_text
 
-                # Tentar análise com Ollama se disponível
-                if self.analyzer.ollama_available:
-                    try:
-                        selected_model = None
-                        model_text = self.ollama_model_combo.currentText()
-                        if model_text != "Auto (Melhor Disponível)":
-                            selected_model = model_text
+                # Configurar progress dialog
+                self.analysis_progress = QProgressDialog(
+                    "Analisando transcrição com IA...", "Cancelar", 0, 100, self
+                )
+                self.analysis_progress.setWindowModality(Qt.WindowModality.WindowModal)
+                self.analysis_progress.setAutoClose(False)
+                self.analysis_progress.setAutoReset(False)
+                self.analysis_progress.show()
+                self.analysis_progress.setValue(5)
 
-                        if self.analyzer.ollama_analyzer:
-                            ollama_results = self.analyzer.ollama_analyzer.analyze_transcription_complete(
-                                transcription_text,
-                                model_name=selected_model
-                            )
-                            analysis_results['ollama_analysis'] = ollama_results
-                    except Exception as e:
-                        logger.warning(f"Análise Ollama falhou: {e}")
+                # Desabilitar botão durante análise
+                self.analyze_btn.setEnabled(False)
 
-                progress_dialog.setValue(90)
-                QApplication.processEvents()
-
-                self._display_analysis_results(analysis_results)
-
-                progress_dialog.setValue(100)
-                progress_dialog.close()
-
-                logger.info("Análise com IA concluída com sucesso")
+                # Iniciar thread de análise
+                self.analysis_thread = AnalysisThread(
+                    self.analyzer, transcription_text,
+                    selected_model, ollama_types, basic_analyses
+                )
+                self.analysis_thread.progress.connect(self.analysis_progress.setValue)
+                self.analysis_thread.status.connect(
+                    lambda msg: self.analysis_progress.setLabelText(msg)
+                )
+                self.analysis_thread.finished.connect(self._on_analysis_finished)
+                self.analysis_thread.error.connect(self._on_analysis_error)
+                self.analysis_progress.canceled.connect(self._on_analysis_canceled)
+                self.analysis_thread.start()
 
             except Exception as e:
                 logger.error(f"Erro ao iniciar análise: {e}")
                 QMessageBox.critical(self, "Erro", f"Erro durante análise: {str(e)}")
+
+        def _on_analysis_finished(self, results):
+            """Callback quando análise termina com sucesso"""
+            self.analyze_btn.setEnabled(True)
+            if hasattr(self, 'analysis_progress') and self.analysis_progress:
+                self.analysis_progress.setValue(100)
+                self.analysis_progress.close()
+            self._display_analysis_results(results)
+            logger.info("Análise com IA concluída com sucesso")
+
+        def _on_analysis_error(self, error_msg):
+            """Callback quando análise falha"""
+            self.analyze_btn.setEnabled(True)
+            if hasattr(self, 'analysis_progress') and self.analysis_progress:
+                self.analysis_progress.close()
+            QMessageBox.critical(self, "Erro", f"Erro durante análise: {error_msg}")
+
+        def _on_analysis_canceled(self):
+            """Callback quando análise é cancelada"""
+            if hasattr(self, 'analysis_thread') and self.analysis_thread.isRunning():
+                self.analysis_thread.terminate()
+                self.analysis_thread.wait(2000)
+            self.analyze_btn.setEnabled(True)
+            logger.info("Análise cancelada pelo usuário")
 
         def _display_analysis_results(self, results: Dict[str, Any]):
             """Exibe resultados da análise em uma janela dedicada"""
@@ -1465,7 +1523,10 @@ if PyQt6_available:
                         analyses = data.get('analyses', {})
                         for analysis_type, analysis_result in analyses.items():
                             if 'error' not in analysis_result:
-                                text += f"{analysis_type.title()}:\n{analysis_result.get('analysis', 'N/A')}\n\n"
+                                content = analysis_result.get('result', analysis_result.get('analysis', 'N/A'))
+                                text += f"━━━ {analysis_type.upper()} ━━━\n{content}\n\n"
+                            else:
+                                text += f"━━━ {analysis_type.upper()} ━━━\nErro: {analysis_result['error']}\n\n"
                     else:
                         text = f"Erro na análise Ollama: {data['error']}"
                     lbl = QLabel(text)
@@ -1530,28 +1591,48 @@ if PyQt6_available:
 
         def _check_ollama_status(self):
             """Verifica status do Ollama na inicialização"""
-            CONFIGURED_MODELS = ["gpt-oss:20b", "deepseek-r1:14b-qwen-distill-q8_0"]
-
             try:
                 self.ollama_status.setText("Status: Verificando...")
 
                 if self.analyzer.ollama_available:
                     try:
-                        available_models = self.analyzer.ollama_analyzer.manager.get_available_models()
-                        filtered_models = [m for m in available_models if m in CONFIGURED_MODELS]
+                        manager = self.analyzer.ollama_analyzer.manager
+                        available_models = manager.get_available_models()
 
                         if available_models:
+                            current_selection = self.ollama_model_combo.currentText()
+                            saved_selection = self.user_settings.get_ollama_model()
                             self.ollama_model_combo.clear()
                             self.ollama_model_combo.addItem("Auto (Melhor Disponível)")
-                            for model in CONFIGURED_MODELS:
-                                if model in available_models:
-                                    self.ollama_model_combo.addItem(model)
+                            for model in available_models:
+                                self.ollama_model_combo.addItem(model)
 
-                            if filtered_models:
-                                self.ollama_status.setText(f"Status: ✅ {len(filtered_models)}/2 modelos disponíveis")
-                                logger.info(f"Ollama: {', '.join(filtered_models)}")
-                            else:
-                                self.ollama_status.setText("Status: ⚠️ Instale gpt-oss:20b ou deepseek-r1")
+                            preferred_selection = current_selection
+                            if not preferred_selection or preferred_selection == "Auto (Melhor Disponível)":
+                                preferred_selection = saved_selection
+
+                            preferred_index = self.ollama_model_combo.findText(preferred_selection)
+                            if preferred_index >= 0:
+                                self.ollama_model_combo.setCurrentIndex(preferred_index)
+
+                            gpu_label = ""
+                            if manager.gpu_info:
+                                gpu_name = manager.gpu_info['name']
+                                vram = manager.gpu_info['vram_total_gb']
+                                gpu_label = f" | GPU: {gpu_name} ({vram:.0f}GB)"
+                            
+                            # Verificar status GPU dos modelos carregados
+                            gpu_status = manager.get_model_gpu_status()
+                            gpu_loaded_label = ""
+                            if gpu_status.get("loaded"):
+                                processor = gpu_status.get("processor", "")
+                                context_length = gpu_status.get("context_length", "?")
+                                gpu_loaded_label = f" | {processor} | ctx={context_length}"
+
+                            self.ollama_status.setText(
+                                f"Status: ✅ {len(available_models)} modelo(s){gpu_label}{gpu_loaded_label}"
+                            )
+                            logger.info(f"Ollama: {', '.join(available_models)}")
                         else:
                             self.ollama_status.setText("Status: ⚠️ Ollama instalado, mas sem modelos")
                     except Exception as e:

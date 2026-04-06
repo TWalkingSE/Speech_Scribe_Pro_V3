@@ -206,3 +206,89 @@ class TranscriptionThread(QThread):
                 'realtime_factor': info.duration / processing_time if processing_time > 0 else 0
             }
         }
+
+
+class AnalysisThread(QThread):
+    """Thread para análise com Ollama sem bloquear a UI"""
+    progress = pyqtSignal(int)
+    finished = pyqtSignal(dict)
+    error = pyqtSignal(str)
+    status = pyqtSignal(str)
+
+    def __init__(self, analyzer, text, selected_model, analysis_types, basic_analyses):
+        super().__init__()
+        self.analyzer = analyzer
+        self.text = text
+        self.selected_model = selected_model
+        self.analysis_types = analysis_types
+        self.basic_analyses = basic_analyses
+
+    def run(self):
+        """Executa análise em thread separada"""
+        try:
+            results = {}
+
+            # Análises básicas (rápidas, sem IA)
+            if self.basic_analyses:
+                self.status.emit("Executando análises básicas...")
+                self.progress.emit(10)
+                basic_results = self.analyzer.analyze_transcription(
+                    self.text, self.basic_analyses
+                )
+                results.update(basic_results)
+
+            self.progress.emit(30)
+
+            # Análise com Ollama
+            if self.analysis_types and self.analyzer.ollama_available and self.analyzer.ollama_analyzer:
+                manager = self.analyzer.ollama_analyzer.manager
+                
+                # Pré-carregar modelo na GPU antes de iniciar análises
+                model_to_load = self.selected_model
+                if not model_to_load:
+                    model_to_load = manager.get_best_available_model(self.analysis_types[0])
+                
+                if model_to_load:
+                    self.status.emit(f"Carregando {model_to_load} na GPU...")
+                    gpu_status = manager.preload_model_gpu(model_to_load)
+                    
+                    if gpu_status.get("loaded"):
+                        processor = gpu_status.get("processor", "?")
+                        context_length = gpu_status.get("context_length", "?")
+                        warning = gpu_status.get("warning", "")
+                        if warning:
+                            self.status.emit(f"GPU: {processor} | ctx={context_length} - Modelo/contexto excedem VRAM")
+                        else:
+                            self.status.emit(f"GPU: {processor} | ctx={context_length}")
+                
+                total = len(self.analysis_types)
+                for i, analysis_type in enumerate(self.analysis_types):
+                    self.status.emit(f"Ollama: analisando {analysis_type}...")
+                    pct = 30 + int(60 * (i / total))
+                    self.progress.emit(pct)
+
+                    try:
+                        result = self.analyzer.ollama_analyzer.manager.analyze_transcription(
+                            self.text,
+                            model_name=self.selected_model,
+                            analysis_type=analysis_type
+                        )
+                        if 'ollama_analysis' not in results:
+                            results['ollama_analysis'] = {
+                                'model_used': result.get('model_used', 'N/A'),
+                                'analyses': {}
+                            }
+                        results['ollama_analysis']['analyses'][analysis_type] = result
+                        results['ollama_analysis']['model_used'] = result.get('model_used', 'N/A')
+                    except Exception as e:
+                        logger.error(f"Erro na análise Ollama '{analysis_type}': {e}")
+                        if 'ollama_analysis' not in results:
+                            results['ollama_analysis'] = {'analyses': {}}
+                        results['ollama_analysis']['analyses'][analysis_type] = {'error': str(e)}
+
+            self.progress.emit(95)
+            self.finished.emit(results)
+
+        except Exception as e:
+            logger.error(f"Erro na thread de análise: {e}")
+            self.error.emit(str(e))
