@@ -45,6 +45,7 @@ class MeuPlugin(Plugin):
 | `EXPORT` | Formatos de exportação | `ExportPlugin` |
 | `PRE_PROCESSOR` | Pré-processamento | `PreProcessorPlugin` |
 | `POST_PROCESSOR` | Pós-processamento | `PostProcessorPlugin` |
+| `UI_EXTENSION` | Extensões de interface | `Plugin` |
 | `INTEGRATION` | Integrações externas | `Plugin` |
 
 ## Plugin de Análise
@@ -123,6 +124,8 @@ class MarkdownExporter(ExportPlugin):
 | `on_file_loaded` | Arquivo carregado | `file_info` |
 | `on_error` | Quando ocorre erro | `error` |
 | `on_progress` | Atualização de progresso | `progress` |
+| `on_app_start` | Aplicação iniciando | - |
+| `on_app_exit` | Aplicação fechando | - |
 
 ## Instalando Plugins
 
