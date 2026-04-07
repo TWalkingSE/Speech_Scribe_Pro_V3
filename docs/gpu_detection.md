@@ -2,208 +2,99 @@
 
 ## Visão Geral
 
-O Speech Scribe Pro V3 detecta automaticamente o hardware disponível e aplica otimizações inteligentes baseadas na GPU detectada. O sistema usa o `ModernHardwareDetector` para identificar GPUs NVIDIA, avaliar performance e configurar parâmetros ideais.
+O Speech Scribe Pro V3 usa `ModernHardwareDetector` para detectar CUDA, validar se a GPU realmente funciona e gerar parâmetros automáticos para transcrição.
 
----
+## O que é detectado
 
-## Funcionalidades
+- Disponibilidade de CUDA via `torch.cuda.is_available()`
+- Teste funcional real da GPU com alocação de tensor
+- Número de GPUs disponíveis
+- Nome, VRAM, compute capability e score de performance de cada GPU
+- Melhor GPU disponível em cenários multi-GPU
 
-### Detecção Automática
-- Verificação de `torch.cuda.is_available()` com validação funcional completa
-- Enumeração de todas as GPUs disponíveis
-- Score de performance automático por GPU
-- Seleção inteligente da melhor GPU (em sistemas multi-GPU)
-- Fallback automático para CPU se a GPU falhar
+## Otimizações aplicadas
 
-### Otimizações por VRAM
+### Por VRAM
 
-| VRAM | Modelo Recomendado | Batch Size | Beam Size | Chunk |
-|------|-------------------|------------|-----------|-------|
-| ≥24GB | large-v3 | 4 | 10 | 60s |
-| ≥16GB | large-v2 | 2 | 8 | 45s |
-| ≥12GB | medium | 2 | 6 | 30s |
-| ≥8GB | small | 1 | 5 | 20s |
-| <8GB | tiny | 1 | 3 | 15s |
+| VRAM detectada | Modelo recomendado | Batch size | Beam size | Chunk |
+|----------------|--------------------|------------|-----------|-------|
+| `>= 20 GB` | `large-v3` | `4` | `10` | `60s` |
+| `>= 15 GB` | `large-v3` | `2` | `8` | `45s` |
+| `>= 11 GB` | `large-v2` | `2` | `6` | `30s` |
+| `>= 7 GB` | `medium` | `1` | `5` | `20s` |
+| `< 7 GB` | `small` | `1` | `3` | `15s` |
 
-### Otimizações por Compute Capability
+### Por Compute Capability
 
-| Compute Capability | GPUs | Compute Type |
-|-------------------|------|-------------|
-| ≥8.0 | RTX 3000/4000/5000 | `float16` |
-| ≥7.0 | RTX 2000 | `float16` |
-| <7.0 | GPUs anteriores | `int8_float16` |
+| Compute Capability | Perfil | Compute type |
+|-------------------|--------|--------------|
+| `>= 12.0` | RTX 50 Series | `float16` |
+| `>= 8.9` | RTX 40 Series | `float16` |
+| `>= 8.0` | RTX 30 Series | `float16` |
+| `>= 7.0` | RTX 20 Series / Volta | `float16` |
+| `< 7.0` | GPUs mais antigas | `int8_float16` |
 
----
-
-## Uso
-
-### Via Código
+## Uso via código
 
 ```python
 from speech_scribe.core.hardware import ModernHardwareDetector
 
 detector = ModernHardwareDetector()
-info = detector.get_full_info()
 
-# Informações disponíveis:
-# info['cuda_available']      - CUDA instalado
-# info['cuda_functional']     - GPU funcional (teste real)
-# info['primary_gpu']         - GPU principal (nome, VRAM, compute capability)
-# info['optimizations']       - Configurações otimizadas para a GPU
+print(detector.info['cuda_available'])
+print(detector.info['cuda_functional'])
+print(detector.info['primary_gpu'])
+print(detector.optimizations)
+
+gpu_details = detector.get_detailed_gpu_info()
+print(gpu_details)
 ```
 
-### Via Interface Gráfica
+## Uso na interface
 
-Na aba **Configurações**:
-- Seção dedicada à GPU com informações detalhadas
-- Botão **"Otimizar GPU"** para limpeza de cache VRAM
-- Botão **"Testar GPU"** para diagnóstico
-- Slider de uso máximo de VRAM
-- Seletor de GPU (em sistemas multi-GPU)
+Na aba de configurações, o app expõe:
 
-### Via CLI
+- seletor de dispositivo (`auto`, `cpu`, `cuda`)
+- seletor de GPU quando há múltiplas GPUs
+- slider de uso de VRAM
+- botão `⚡ Otimizar GPU`
+- painel com informações detalhadas da GPU detectada
+
+## Uso via CLI
 
 ```bash
 python -m speech_scribe.cli status --hardware
 ```
 
----
+## Comportamentos importantes
 
-## Recursos Avançados
+### Fallback para CPU
+Se CUDA falhar durante a transcrição, o engine tenta recarregar o modelo em CPU e continuar o processamento.
 
-### Gerenciamento de Memória
-O sistema limpa automaticamente o cache CUDA antes de carregar modelos e configura a fração máxima de memória GPU por processo.
+### Cache de modelos
+Os modelos carregados pelo engine ficam em cache em memória por combinação de modelo e dispositivo, evitando recarregamentos desnecessários.
 
-### Fallback Inteligente
-Se a GPU falhar durante a transcrição (ex: CUDA out of memory), o sistema automaticamente recarrega o modelo na CPU e continua o processamento.
-
-### Cache de Modelos
-Modelos carregados ficam em cache LRU (até 4 modelos), evitando recarregamento ao alternar entre modelos diferentes.
-
-### Métricas de Performance
-Após cada transcrição, o sistema registra:
-- Fator de tempo real (velocidade vs duração do áudio)
-- Dispositivo utilizado (CPU/CUDA)
-- Caracteres processados por segundo
-
----
+### Otimização de memória
+`optimize_gpu_memory()` limpa o cache CUDA e aplica a fração de VRAM configurada para o processo atual.
 
 ## Solução de Problemas
 
-### "CUDA out of memory"
-- Use um modelo menor (`small` ao invés de `large-v3`)
-- Feche outras aplicações que usam a GPU
-- Reduza o slider de uso de VRAM na aba Configurações
-
 ### GPU não detectada
-- Verifique se os drivers NVIDIA estão atualizados: `nvidia-smi`
-- Verifique se o PyTorch foi instalado com CUDA: `python -c "import torch; print(torch.cuda.is_available())"`
-- Reinstale o PyTorch com a versão CUDA correta (ver [Instalação](installation.md))
+- verifique drivers com `nvidia-smi`
+- confirme o build CUDA do PyTorch com `python -c "import torch; print(torch.cuda.is_available())"`
+- reinstale PyTorch com o índice CUDA correto, conforme [installation.md](installation.md)
+
+### CUDA detectado, mas não funcional
+- reinicie o ambiente Python
+- valide se outras bibliotecas não carregaram DLLs conflitantes antes do `torch`
+- em Windows, prefira iniciar o app pelo fluxo normal do projeto, que importa `torch` antes de `PyQt6`
+
+### CUDA out of memory
+- use um modelo menor
+- reduza a fração de VRAM na interface
+- feche outros processos que usam GPU
 
 ### Performance abaixo do esperado
-- Verifique se está usando GPU: confira o indicador na barra de status
-- Use o botão "Testar GPU" na aba Configurações para diagnóstico
-- Certifique-se de que o PyTorch com CUDA está instalado corretamente
-
-## 🚀 **Como Usar**
-
-### **1. Detecção Automática:**
-```bash
-# Executar aplicação - detecção automática
-python main.py
-
-# Teste específico de GPU
-python test_gpu_detection.py
-```
-
-### **2. Na Interface:**
-1. **Aba "⚙️ Configurações"**
-2. **Seção "🎮 Informações da GPU"** (se disponível)
-3. **Botões de otimização** e teste
-4. **Configuração manual** de VRAM se necessário
-
-### **3. Via Código:**
-```python
-from speech_scribe.core.hardware import ModernHardwareDetector
-
-# Detecção completa
-detector = ModernHardwareDetector()
-
-# Verificar se GPU está funcional
-if detector.info['cuda_functional']:
-    print(f"GPU: {detector.info['primary_gpu']['name']}")
-    print(f"Modelo recomendado: {detector.optimizations['recommended_model']}")
-    
-    # Otimizar GPU
-    detector.optimize_gpu_memory()
-```
-
----
-
-## 🎯 **Benefícios Implementados**
-
-### **✅ Para Usuários:**
-- **Detecção automática** - sem configuração manual
-- **Otimizações inteligentes** - melhor performance automaticamente
-- **Interface informativa** - saber exatamente o que está acontecendo
-- **Fallback automático** - nunca falha por problemas de GPU
-
-### **✅ Para Desenvolvedores:**
-- **Código modular** - fácil de manter e estender
-- **APIs bem definidas** - integração simples
-- **Logs detalhados** - debugging eficiente
-- **Extensibilidade** - fácil adicionar novos tipos de hardware
-
-### **✅ Para Performance:**
-- **5-15x mais rápido** com GPU apropriada
-- **Uso otimizado de VRAM** - sem desperdício
-- **Cache inteligente** - modelos carregados uma vez
-- **Processamento paralelo** - máximo aproveitamento do hardware
-
----
-
-## 📈 **Resultados Esperados por Hardware**
-
-### **🖥️ CPU High-End (24+ cores, 32GB+ RAM):**
-- **Velocidade:** 2-3x tempo real
-- **Modelo:** large-v2
-- **Qualidade:** Alta
-
-### **🎮 GPU Entry (RTX 4060, 8GB VRAM):**
-- **Velocidade:** 3-5x tempo real  
-- **Modelo:** small
-- **Qualidade:** Média
-
-### **🚀 GPU Mid (RTX 4070, 12GB VRAM):**
-- **Velocidade:** 5-8x tempo real
-- **Modelo:** medium
-- **Qualidade:** Média-Alta
-
-### **🔥 GPU High-End (RTX 4090, 24GB VRAM):**
-- **Velocidade:** 10-15x tempo real
-- **Modelo:** large-v3  
-- **Qualidade:** Máxima
-
----
-
-## 🎉 **Conclusão**
-
-A **detecção automática de GPU** foi implementada com sucesso no Speech Scribe Pro V3, criando um sistema **mais inteligente e robusto** que o projeto original. 
-
-### **Principais Conquistas:**
-
-1. ✅ **Detecção 100% automática** - sem configuração manual necessária
-2. ✅ **Otimizações inteligentes** - baseadas no hardware específico
-3. ✅ **Interface moderna** - informações detalhadas da GPU
-4. ✅ **Fallback robusto** - nunca falha por problemas de hardware
-5. ✅ **Performance superior** - 5-15x mais rápido com GPU apropriada
-
-O sistema agora **detecta automaticamente** qualquer GPU NVIDIA com CUDA, **testa sua funcionalidade**, **calcula otimizações específicas** e **aplica configurações automáticas** para máxima performance.
-
-**🚀 O Speech Scribe Pro V3 está pronto para usar GPU automaticamente!**
-
----
-
-*📅 Implementado em: 22/08/2025*  
-*🔧 Versão: 3.0.0*  
-*📊 Status: ✅ Completo e Testado* 
+- confira no status do sistema se o device efetivo é `cuda`
+- confirme se a GPU selecionada é a correta em sistemas multi-GPU
+- use o modelo recomendado exibido pelo detector para o hardware atual
