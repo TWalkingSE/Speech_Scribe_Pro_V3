@@ -7,12 +7,18 @@ class SmartDependencyManager:
     def __init__(self):
         self.cache = {}
         self.required_deps = {
-            'faster_whisper': 'faster-whisper>=1.0.0',
-            'torch': 'torch>=2.0.0',
-            'librosa': 'librosa>=0.10.0',
-            'moviepy': 'moviepy>=1.0.3',
-            'requests': 'requests>=2.28.0',
-            'numpy': 'numpy>=1.24.0'
+            'faster_whisper': 'faster-whisper',
+            'torch': 'torch',
+            'librosa': 'librosa',
+            'requests': 'requests',
+            'numpy': 'numpy',
+            'PyQt6': 'PyQt6',
+            'psutil': 'psutil',
+            'dotenv': 'python-dotenv',
+            'yaml': 'PyYAML',
+            'deep_translator': 'deep-translator',
+            'docx': 'python-docx',
+            'pyannote.audio': 'pyannote.audio'
         }
         
     def check_dependency(self, name: str) -> bool:
@@ -40,26 +46,34 @@ class SmartDependencyManager:
     def generate_requirements(self) -> str:
         """Gera arquivo requirements.txt otimizado"""
         reqs = [
-            "# Speech Scribe Pro V3 - Dependências Otimizadas",
-            "# Instale com: pip install -r requirements.txt\n",
-            "# Dependências principais",
-            "faster-whisper>=1.0.0",
-            "torch>=2.0.0 --index-url https://download.pytorch.org/whl/cu118",
-            "librosa>=0.10.0",
-            "moviepy>=1.0.3",
-            "requests>=2.28.0",
-            "numpy>=1.24.0",
-            "PyQt6>=6.5.0",
-            "\n# Dependências para análise avançada",
-            "deep-translator>=1.11.0",
-            "python-docx>=0.8.11",
-            "webvtt-py>=0.4.6",
-            "matplotlib>=3.6.0",
-            "wordcloud>=1.9.0",
-            "\n# Dependências opcionais para IA",
-            "transformers>=4.30.0",
-            "sentence-transformers>=2.2.0",
-            "openai>=1.0.0",
-            "anthropic>=0.3.0"
+            "# Speech Scribe Pro V3 - Dependencias",
+            "# Instale com: pip install -r requirements.txt",
+            "#",
+            "# Se voce precisar de uma build especifica do PyTorch (CUDA/ROCm),",
+            "# instale-a antes deste arquivo. Exemplo:",
+            "# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128",
+            "",
+            "# Dependencias principais",
+            "torch",
+            "faster-whisper",
+            "librosa",
+            "numpy",
+            "PyQt6",
+            "requests",
+            "psutil",
+            "python-dotenv",
+            "PyYAML",
+            "",
+            "# Recursos integrados",
+            "deep-translator",
+            "python-docx",
+            "pyannote.audio",
+            "",
+            "# Testes e smoke tests",
+            "pytest",
+            "pytest-qt",
+            "",
+            "# Streaming e microfone",
+            "pyaudio"
         ]
         return "\n".join(reqs)
