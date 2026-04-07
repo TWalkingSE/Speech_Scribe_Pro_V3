@@ -6,62 +6,28 @@
 #   RTX 5060 TI / CUDA 12.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 #   CUDA 12.1:                pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 #   CUDA 11.8:                pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-torch>=2.0.0
-torchvision>=0.15.0
-torchaudio>=2.0.0
 
-# ===== DEPENDÊNCIAS PRINCIPAIS =====
-faster-whisper>=1.0.0
-librosa>=0.10.0
-moviepy>=1.0.3
-requests>=2.28.0
-numpy>=1.24.0
-PyQt6>=6.5.0
-PyQt6-Multimedia>=6.5.0
-soundfile>=0.12.0
-scipy>=1.10.0
+# Dependencias principais
+torch
+faster-whisper
+librosa
+numpy
+PyQt6
+requests
+psutil
+python-dotenv
+PyYAML
 
-# ===== PROCESSAMENTO DE ÁUDIO AVANÇADO =====
-webrtcvad>=2.0.10
-pydub>=0.25.1
-audioread>=3.0.0
+# Recursos integrados
+deep-translator
+python-docx
+pyannote.audio
 
-# ===== ANÁLISE E EXPORTAÇÃO =====
-deep-translator>=1.11.0
-python-docx>=0.8.11
-webvtt-py>=0.4.6
-matplotlib>=3.6.0
-wordcloud>=1.9.0
-pillow>=9.0.0
+# Testes e smoke tests
+pytest
+pytest-qt
 
-# ===== INTEGRAÇÃO OLLAMA (IA LOCAL) =====
-httpx>=0.24.0
-pydantic>=2.0.0
-aiohttp>=3.8.0
+# Streaming e microfone
+pyaudio
 
-# ===== DIARIZAÇÃO (SEPARAÇÃO DE VOZES) =====
-pyannote.audio>=3.1.0
-huggingface-hub>=0.16.0
-
-# ===== UTILITÁRIOS =====
-pyyaml>=6.0
-python-dotenv>=1.0.0
-coloredlogs>=15.0
-tqdm>=4.64.0
-psutil>=5.9.0
-packaging>=21.0
-
-# ===== STREAMING / MICROFONE (opcional) =====
-# Necessário para transcrição em tempo real via microfone
-pyaudio>=0.2.14
-
-# ===== OPCIONAL: APIs de IA externas =====
-# openai>=1.0.0
-# anthropic>=0.3.0
-
-# ===== DESENVOLVIMENTO (opcional) =====
-# pytest>=7.0.0
-# black>=22.0.0
-# isort>=5.10.0
-# mypy>=1.0.0
 
