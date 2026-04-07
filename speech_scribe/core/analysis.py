@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from speech_scribe.utils.logger import logger
 
 class SmartAnalyzer:
@@ -22,7 +22,13 @@ class SmartAnalyzer:
             self.ollama_analyzer = None
             self.ollama_available = False
     
-    def analyze_transcription(self, text: str, analyses: List[str] = None, use_ollama: bool = False) -> Dict[str, Any]:
+    def analyze_transcription(
+        self,
+        text: str,
+        analyses: List[str] = None,
+        use_ollama: bool = False,
+        ollama_model: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Realiza análises múltiplas do texto transcrito"""
         if analyses is None:
             analyses = list(self.analyzers.keys())
@@ -32,7 +38,10 @@ class SmartAnalyzer:
         # Se Ollama estiver disponível e solicitado
         if use_ollama and self.ollama_available:
             try:
-                ollama_result = self.ollama_analyzer.analyze_transcription_complete(text)
+                ollama_result = self.ollama_analyzer.analyze_transcription_complete(
+                    text,
+                    model_name=ollama_model,
+                )
                 results['ollama_analysis'] = ollama_result
             except Exception as e:
                 results['ollama_analysis'] = {'error': str(e)}
