@@ -130,7 +130,7 @@ Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de �
 - Evita acumulação de arquivos de log grandes
 
 ### Testes Automatizados
-- Suite de **51+ testes** cobrindo: i18n, themes, settings, config, history, presets, batch export, translator, models dataclass
+- Suite de testes cobrindo: i18n, themes, settings, config, history, presets, batch export, translator, integração com Ollama, cache, plugins e smoke tests de GUI
 - Smoke tests para GUI (com `pytest-qt`)
 
 ### Atalhos de Teclado
@@ -257,9 +257,16 @@ Speech_Scribe_Pro_v3/
 
 tests/                               # Testes automatizados
 ├── conftest.py                      # Fixtures compartilhadas
-├── test_new_modules.py              # 43 testes (i18n, themes, settings, etc.)
-├── test_gui_smoke.py                # Smoke tests GUI + TranscriptionResult
-└── test_core.py                     # Testes dos módulos core
+├── test_cache.py                    # Cache e expiração
+├── test_config_manager.py           # Configuração avançada
+├── test_core.py                     # Módulos centrais
+├── test_enhancements.py             # Melhorias e presets
+├── test_exceptions.py               # Hierarquia de exceções
+├── test_gui_smoke.py                # Smoke tests GUI
+├── test_new_modules.py              # i18n, themes, settings, history, etc.
+├── test_ollama_integration.py       # Integração com Ollama
+├── test_phase3.py                   # Performance, cache e batch core
+└── test_phase4.py                   # Plugins e exportação
 ```
 
 ---
@@ -271,10 +278,13 @@ tests/                               # Testes automatizados
 | Variável | Descrição | Obrigatório |
 |----------|-----------|:-----------:|
 | `HUGGINGFACE_TOKEN` | Token para diarização (pyannote.audio) | Para diarização |
-| `OLLAMA_HOST` | URL do servidor Ollama | Não (padrão: localhost:11434) |
-| `OLLAMA_MODEL` | Modelo padrão para análise | Não |
-| `OPENAI_API_KEY` | Chave da API OpenAI | Não |
+| `SPEECH_SCRIBE_DEVICE` | Override do dispositivo padrão (`auto`, `cpu`, `cuda`) | Não |
+| `SPEECH_SCRIBE_MODEL` | Override do modelo padrão de transcrição | Não |
+| `SPEECH_SCRIBE_LANGUAGE` | Override do idioma padrão da transcrição | Não |
 | `SPEECH_SCRIBE_VERSION_URL` | URL para verificação de atualização | Não |
+| `CUDA_VISIBLE_DEVICES` | Limita as GPUs visíveis para CUDA/PyTorch | Não, avançado |
+
+O modelo padrão do Ollama é persistido nas configurações do usuário pela interface, e não via `.env`.
 
 ### Hardware Recomendado
 
@@ -342,7 +352,7 @@ O `SmartDependencyManager` usa `importlib.util.find_spec()` (sem efeitos colater
 ## Testes
 
 ```bash
-# Executar todos os testes (51+ testes)
+# Executar todos os testes
 python -m pytest tests/ -v
 
 # Apenas testes dos módulos adicionais
@@ -391,4 +401,3 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull re
 MIT License — veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 Copyright (c) 2025-2026 Speech Scribe Pro V3
-
