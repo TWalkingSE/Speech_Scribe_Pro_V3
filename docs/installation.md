@@ -51,10 +51,11 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 
 # Dependências do projeto
 pip install -r requirements.txt
-
-# Para transcrição via microfone (opcional)
-pip install pyaudio
 ```
+
+O `requirements.txt` inclui as dependências diretas do projeto para GUI, transcrição, diarização, tradução, exportação DOCX, configuração YAML, streaming por microfone e testes.
+
+Se o `pyaudio` falhar na instalação, use uma wheel compatível com sua plataforma ou resolva antes as dependências nativas do PortAudio.
 
 ### 4. Configurar Diarização (Opcional)
 
@@ -149,6 +150,21 @@ ollama pull llama3.2:3b
 pip install PyQt6
 # ou no Linux
 sudo apt install python3-pyqt6
+```
+
+### Erro ao instalar `pyaudio`
+- Windows: prefira uma wheel compatível com sua versão do Python, quando disponível
+- Linux: instale os headers do PortAudio antes de rodar `pip install -r requirements.txt`
+- macOS: instale o PortAudio antes de instalar as dependências Python
+
+Exemplos:
+
+```bash
+# Ubuntu/Debian
+sudo apt install portaudio19-dev python3-dev
+
+# macOS
+brew install portaudio
 ```
 
 ## Atualização
