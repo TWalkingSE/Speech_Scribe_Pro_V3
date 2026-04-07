@@ -57,6 +57,8 @@ O `requirements.txt` inclui as dependências diretas do projeto para GUI, transc
 
 Se o `pyaudio` falhar na instalação, use uma wheel compatível com sua plataforma ou resolva antes as dependências nativas do PortAudio.
 
+Se quiser sobrescrever defaults da aplicação via `.env`, use as chaves `SPEECH_SCRIBE_DEVICE`, `SPEECH_SCRIBE_MODEL`, `SPEECH_SCRIBE_LANGUAGE` e `SPEECH_SCRIBE_VERSION_URL` do arquivo `.env.example`.
+
 ### 4. Configurar Diarização (Opcional)
 
 Para usar diarização (separação de oradores):
