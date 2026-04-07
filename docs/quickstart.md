@@ -46,7 +46,7 @@ python -m speech_scribe.cli transcribe *.mp3 -o resultados/
 Após a transcrição, você pode analisar o texto:
 
 ### Interface Gráfica
-1. Vá para a aba "Análise"
+1. Vá para a aba "🧠 Análise IA"
 2. Selecione as análises desejadas
 3. Clique em "Analisar"
 
@@ -67,7 +67,7 @@ python -m speech_scribe.cli analyze texto.txt --all --json
 Para identificar diferentes oradores:
 
 1. Configure o token HuggingFace (ver instalação)
-2. Na interface, marque "Habilitar Diarização"
+2. Na interface, marque "🎭 Reconhecimento de Oradores"
 3. Ou na CLI:
    ```bash
    python -m speech_scribe.cli transcribe reuniao.mp3 --diarize
@@ -87,7 +87,14 @@ python -m speech_scribe.cli transcribe video.mp4 -m small -l auto -f srt -o vide
 
 ### Processar Pasta Inteira
 ```bash
-python -m speech_scribe.cli batch audios/*.mp3 -m small -o transcritos/ -w 4
+python -m speech_scribe.cli batch audios/*.mp3 -m small -o transcricoes_lote.txt
+```
+
+No fluxo atual da CLI, o comando `batch` gera um arquivo TXT consolidado com todas as transcrições concluídas.
+
+### Embutir Legenda no Vídeo
+```bash
+python -m speech_scribe.cli transcribe video.mp4 -f srt --embed-subtitle
 ```
 
 ### Gerar Relatório de Reunião
