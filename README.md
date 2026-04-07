@@ -14,14 +14,6 @@
 
 Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de áudio/vídeo, construída com Python, PyQt6 e modelos Whisper via `faster-whisper`. Funciona offline, roda na sua GPU NVIDIA (ou CPU), e oferece uma suíte de recursos avançados numa interface gráfica moderna.
 
-
-<img width="2147" height="1062" alt="image" src="https://github.com/user-attachments/assets/ea90c2ef-afe9-4047-8d26-29cf0a26d89d" />
-
-
-<img width="2132" height="1047" alt="image" src="https://github.com/user-attachments/assets/a89b5454-0d75-47ab-83f8-62f3c07b000f" />
-
-
-
 **Stack principal:** Python 3.12 · PyQt6 · faster-whisper · PyTorch CUDA · pyannote.audio · Ollama
 
 ---
@@ -182,13 +174,11 @@ pip install torch torchvision torchaudio
 ### 3. Instalar dependências
 ```bash
 pip install -r requirements.txt
-
-# Para player de áudio integrado (necessário)
-pip install PyQt6-Multimedia
-
-# Para transcrição via microfone (opcional)
-pip install pyaudio
 ```
+
+O `requirements.txt` agora inclui as dependências diretas do projeto para GUI, transcrição, diarização, tradução, exportação DOCX, configuração YAML, streaming por microfone e testes. Se o `pyaudio` falhar no seu ambiente, instale uma wheel compatível com sua plataforma ou resolva antes a dependência nativa do PortAudio.
+
+Em Linux e macOS, isso normalmente significa instalar o PortAudio antes de repetir o `pip install -r requirements.txt`.
 
 ### 4. Configurar variáveis de ambiente
 ```bash
@@ -250,9 +240,15 @@ Speech_Scribe_Pro_v3/
     │   ├── enhancements.py          # SearchWidget, HistoryDialog + export
     │   └── mixins/                  # Documentação de organização
     │
+    ├── plugins/                     # Sistema de plugins
+    │   ├── base.py                  # Interfaces e tipos base
+    │   ├── manager.py               # Descoberta e carregamento
+    │   └── examples/                # Plugins de exemplo
+    │
     ├── utils/                       # Utilitários
     │   ├── logger.py                # Logging com RotatingFileHandler
-    │   └── performance.py           # Monitoramento de performance
+    │   ├── performance.py           # Monitoramento de performance
+    │   └── structured_logger.py     # Logging estruturado
 
 tests/                               # Testes automatizados
 ├── conftest.py                      # Fixtures compartilhadas
@@ -344,11 +340,10 @@ O `SmartDependencyManager` usa `importlib.util.find_spec()` (sem efeitos colater
 # Executar todos os testes (51+ testes)
 python -m pytest tests/ -v
 
-# Apenas testes de módulos core
+# Apenas testes dos módulos adicionais
 python -m pytest tests/test_new_modules.py -v
 
-# Smoke tests GUI (requer pytest-qt)
-pip install pytest-qt
+# Smoke tests GUI (pytest-qt já incluído no requirements.txt)
 python -m pytest tests/test_gui_smoke.py -v
 ```
 
@@ -391,3 +386,4 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull re
 MIT License — veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 Copyright (c) 2025-2026 Speech Scribe Pro V3
+
