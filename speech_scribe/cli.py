@@ -176,6 +176,7 @@ def cmd_transcribe(args, output_json: bool = False):
     from speech_scribe.core.config import AppConfig
     from speech_scribe.core.hardware import ModernHardwareDetector
     from speech_scribe.core.transcription import IntelligentTranscriptionEngine
+    from speech_scribe.core.diarization import SpeakerDiarization
     
     # Importar embutidor de legendas se necessário
     embed_subtitle = getattr(args, 'embed_subtitle', False)
@@ -202,7 +203,18 @@ def cmd_transcribe(args, output_json: bool = False):
     # Inicializar componentes
     config = AppConfig()
     hardware = ModernHardwareDetector()
+
+    if args.device == 'cuda' and not hardware.info['cuda_functional']:
+        if not output_json:
+            print_warning("CUDA solicitado, mas não está funcional. Usando CPU.")
+    elif args.device != 'auto':
+        hardware.optimizations['device'] = args.device
+
     engine = IntelligentTranscriptionEngine(config, hardware)
+    diarizer = SpeakerDiarization() if args.diarize else None
+
+    if args.diarize and diarizer and not diarizer.available and not output_json:
+        print_warning("Diarização solicitada, mas não está disponível no ambiente atual.")
     
     if not output_json:
         print_info(f"Modelo: {args.model} | Idioma: {args.language} | Device: {hardware.get_device_info()}")
@@ -228,6 +240,18 @@ def cmd_transcribe(args, output_json: bool = False):
             result = asyncio.run(engine.transcribe_async(
                 str(path), args.model, args.language
             ))
+
+            if args.diarize and diarizer and diarizer.available:
+                speaker_segments = diarizer.process_diarization(str(path))
+                if speaker_segments:
+                    result['segments'] = diarizer.merge_with_transcription(
+                        result.get('segments', []),
+                        speaker_segments,
+                    )
+                    result['speaker_stats'] = diarizer.get_speaker_statistics(result['segments'])
+                    result['diarization_enabled'] = True
+                else:
+                    result['diarization_enabled'] = False
             
             if result:
                 # Salvar resultado
@@ -242,7 +266,7 @@ def cmd_transcribe(args, output_json: bool = False):
                 
                 # Formatar saída
                 if args.format == 'json':
-                    output_file.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+                    output_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
                 elif args.format == 'srt':
                     srt_content = _format_srt(result.get('segments', []))
                     output_file.write_text(srt_content, encoding='utf-8')
@@ -250,7 +274,19 @@ def cmd_transcribe(args, output_json: bool = False):
                     vtt_content = _format_vtt(result.get('segments', []))
                     output_file.write_text(vtt_content, encoding='utf-8')
                 else:  # txt
-                    output_file.write_text(result['text'], encoding='utf-8')
+                    if args.timestamps and result.get('segments'):
+                        lines = []
+                        for seg in result['segments']:
+                            start = seg.get('start', 0)
+                            end = seg.get('end', start)
+                            speaker = seg.get('speaker')
+                            prefix = f"[{start:.2f}s - {end:.2f}s]"
+                            if speaker:
+                                prefix += f" [{speaker}]"
+                            lines.append(f"{prefix} {seg.get('text', '').strip()}".strip())
+                        output_file.write_text("\n".join(lines), encoding='utf-8')
+                    else:
+                        output_file.write_text(result['text'], encoding='utf-8')
                 
                 if output_json:
                     results.append({
@@ -338,19 +374,27 @@ def cmd_analyze(args, output_json: bool = False):
     
     # Executar análise
     analyzer = SmartAnalyzer()
-    results = analyzer.analyze_transcription(text, analyses)
+    results = analyzer.analyze_transcription(
+        text,
+        analyses,
+        use_ollama=args.ollama,
+        ollama_model=args.ollama_model if args.ollama else None,
+    )
+    serialized_results = json.dumps(results, indent=2, ensure_ascii=False)
+    
+    if args.output:
+        output_path = Path(args.output)
+        output_path.write_text(serialized_results, encoding='utf-8')
     
     # Saída
     if output_json:
-        print(json.dumps(results, indent=2, ensure_ascii=False))
+        print(serialized_results)
     else:
         print()
         _print_analysis_results(results)
         
         # Salvar se solicitado
         if args.output:
-            output_path = Path(args.output)
-            output_path.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding='utf-8')
             print_success(f"Resultados salvos: {output_path}")
 
 
