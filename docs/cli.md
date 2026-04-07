@@ -38,8 +38,11 @@ python -m speech_scribe.cli transcribe <arquivos> [opções]
 | `-o, --output` | - | Diretório/arquivo de saída |
 | `-f, --format` | `txt` | Formato: txt, json, srt, vtt |
 | `--diarize` | - | Habilitar diarização |
-| `--timestamps` | - | Incluir timestamps |
-| `--device` | `auto` | Dispositivo: auto, cpu, cuda |
+| `--timestamps` | - | Incluir timestamps no TXT |
+| `--device` | `auto` | Forçar dispositivo: auto, cpu, cuda |
+| `--embed-subtitle` | - | Embutir legenda no vídeo via FFmpeg |
+| `--burn-in` | `True` | Queimar legenda no vídeo ao embutir |
+| `--keep-srt` | `True` | Manter arquivo SRT ao embutir legenda |
 
 **Exemplos:**
 
@@ -55,6 +58,9 @@ python -m speech_scribe.cli t *.mp3 -o transcritos/
 
 # Com diarização
 python -m speech_scribe.cli t reuniao.mp3 --diarize --timestamps
+
+# Embutir legenda diretamente no vídeo
+python -m speech_scribe.cli t video.mp4 -f srt --embed-subtitle
 ```
 
 ---
@@ -80,8 +86,8 @@ python -m speech_scribe.cli analyze <arquivo> [opções]
 | `--summary` | Gerar resumo |
 | `--topics` | Identificar tópicos |
 | `--all` | Todas as análises |
-| `--ollama` | Usar Ollama para IA |
-| `--ollama-model` | Modelo Ollama |
+| `--ollama` | Incluir bloco de análise via Ollama |
+| `--ollama-model` | Forçar modelo específico do Ollama |
 | `-o, --output` | Arquivo de saída |
 
 **Exemplos:**
@@ -96,15 +102,17 @@ python -m speech_scribe.cli a texto.txt --sentiment --keywords
 # Com Ollama
 python -m speech_scribe.cli a texto.txt --all --ollama --ollama-model llama3.2:3b
 
-# Saída JSON
+# Saída JSON e arquivo ao mesmo tempo
 python -m speech_scribe.cli a texto.txt --all --json -o analise.json
 ```
+
+Quando `--json` é usado, o resultado continua sendo impresso no stdout. Se `-o` também for informado, o mesmo JSON é salvo em arquivo.
 
 ---
 
 ### batch (b)
 
-Processa múltiplos arquivos em paralelo.
+Processa múltiplos arquivos em lote com um único modelo carregado na memória.
 
 ```bash
 python -m speech_scribe.cli batch <arquivos> [opções]
@@ -116,22 +124,25 @@ python -m speech_scribe.cli batch <arquivos> [opções]
 |-------|--------|-----------|
 | `-m, --model` | `small` | Modelo Whisper |
 | `-l, --language` | `auto` | Idioma |
-| `-o, --output` | - | Diretório de saída |
-| `-w, --workers` | `2` | Workers paralelos |
-| `--analyze` | - | Analisar após transcrever |
+| `-o, --output` | - | Arquivo TXT consolidado ou diretório de saída |
+| `-w, --workers` | `2` | Opção aceita, mas o fluxo atual da CLI processa arquivos em sequência |
+| `--analyze` | - | Opção reservada; não altera a saída consolidada atual |
+| `--embed-subtitle` | - | Embute legendas em vídeos transcritos via FFmpeg |
 
 **Exemplos:**
 
 ```bash
 # Batch simples
-python -m speech_scribe.cli b audios/*.mp3 -o resultados/
+python -m speech_scribe.cli b audios/*.mp3 -o transcricoes_lote.txt
 
-# Com 4 workers
-python -m speech_scribe.cli b *.mp3 -w 4 -m medium
+# Salvar em diretório (gera nome consolidado automaticamente)
+python -m speech_scribe.cli b *.mp3 -o resultados/
 
-# Com análise
-python -m speech_scribe.cli b *.mp3 --analyze -o processados/
+# Embutindo legenda em vídeos do lote
+python -m speech_scribe.cli b *.mp4 --embed-subtitle -o lote_videos.txt
 ```
+
+O comando `batch` atual gera um único arquivo TXT consolidado contendo as transcrições bem-sucedidas do lote.
 
 ---
 
