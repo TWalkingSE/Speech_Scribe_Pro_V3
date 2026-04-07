@@ -30,5 +30,4 @@ pytest-qt
 
 # Streaming e microfone
 pyaudio
-pi
 
