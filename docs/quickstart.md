@@ -1,5 +1,15 @@
 # 🚀 Guia de Início Rápido
 
+## Nota sobre Conectividade
+
+O fluxo principal de transcrição e análise com Ollama pode rodar localmente, mas alguns recursos opcionais podem usar rede:
+
+- **Whisper** pode baixar o modelo na primeira execução, se ele ainda não estiver em cache local.
+- **Diarização** com `pyannote.audio` pode acessar o Hugging Face para autenticação e download inicial do pipeline/modelos.
+- **Tradução** envia o texto para um serviço externo somente quando essa função é usada.
+- **Verificação de atualização** só ocorre se `SPEECH_SCRIBE_VERSION_URL` estiver configurada.
+- **Ollama** usa `http://localhost:11434`, ou seja, tráfego local entre a aplicação e o serviço do Ollama.
+
 ## Sua Primeira Transcrição
 
 ### Via Interface Gráfica
