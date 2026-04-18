@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/whisper-faster--whisper-red" alt="Whisper">
 </p>
 
-Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de áudio/vídeo, construída com Python, PyQt6 e modelos Whisper via `faster-whisper`. Funciona offline, roda na sua GPU NVIDIA (ou CPU), e oferece uma suíte de recursos avançados numa interface gráfica moderna.
+Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de áudio/vídeo, construída com Python, PyQt6 e modelos Whisper via `faster-whisper`. Pode operar offline para transcrição e análise local após a instalação e o cache dos modelos, roda na sua GPU NVIDIA (ou CPU), e oferece uma suíte de recursos avançados numa interface gráfica moderna.
 
 <img width="1818" height="1150" alt="image" src="https://github.com/user-attachments/assets/69c79353-0deb-4b8d-85e4-f9ce248e4e7e" />
 
@@ -20,8 +20,6 @@ Speech Scribe Pro V3 é uma aplicação desktop completa para transcrição de �
 
 
 **Stack principal:** Python 3.12 · PyQt6 · faster-whisper · PyTorch CUDA · pyannote.audio · Ollama
-
----
 
 ## Funcionalidades
 
@@ -285,6 +283,18 @@ tests/                               # Testes automatizados
 | `CUDA_VISIBLE_DEVICES` | Limita as GPUs visíveis para CUDA/PyTorch | Não, avançado |
 
 O modelo padrão do Ollama é persistido nas configurações do usuário pela interface, e não via `.env`.
+
+### Conectividade e Requisições Externas
+
+O aplicativo pode operar localmente para transcrição e análise com Ollama, mas alguns recursos opcionais podem realizar requisições de rede dependendo da configuração e do uso:
+
+- **Transcrição com Whisper**: ao carregar um modelo pelo nome, o `faster-whisper` pode baixar os arquivos do modelo do Hugging Face Hub na primeira execução, caso ainda não estejam em cache local.
+- **Diarização**: ao usar `pyannote.audio`, o aplicativo pode acessar o Hugging Face para autenticação e download inicial do pipeline/modelos quando a diarização é habilitada.
+- **Tradução**: a tradução integrada usa `deep-translator` com `GoogleTranslator` e envia o texto a ser traduzido para um serviço externo somente quando essa função é utilizada.
+- **Verificação de atualização**: a aplicação só faz essa consulta se `SPEECH_SCRIBE_VERSION_URL` estiver configurada. No projeto atual, essa variável vem vazia no `.env.example`, então a checagem fica desativada por padrão.
+- **Ollama**: a integração com Ollama usa HTTP para conversar com um serviço local em `http://localhost:11434`. Isso é tráfego local entre a aplicação e o Ollama, não uma requisição para servidores externos do projeto.
+
+O código do projeto não implementa integração explícita com serviços próprios de analytics ou telemetria.
 
 ### Hardware Recomendado
 
