@@ -59,6 +59,18 @@ Se o `pyaudio` falhar na instalação, use uma wheel compatível com sua platafo
 
 Se quiser sobrescrever defaults da aplicação via `.env`, use as chaves `SPEECH_SCRIBE_DEVICE`, `SPEECH_SCRIBE_MODEL`, `SPEECH_SCRIBE_LANGUAGE` e `SPEECH_SCRIBE_VERSION_URL` do arquivo `.env.example`.
 
+## Conectividade e Requisições Externas
+
+O Speech Scribe Pro V3 pode operar localmente para transcrição e análise com Ollama, mas alguns recursos opcionais podem realizar requisições de rede dependendo da configuração e do uso:
+
+- **Transcrição com Whisper**: ao carregar um modelo pelo nome, o `faster-whisper` pode baixar os arquivos do modelo do Hugging Face Hub na primeira execução, caso ainda não estejam em cache local.
+- **Diarização**: ao usar `pyannote.audio`, o aplicativo pode acessar o Hugging Face para autenticação e download inicial do pipeline/modelos quando a diarização é habilitada.
+- **Tradução**: a tradução integrada usa `deep-translator` com `GoogleTranslator` e envia o texto a ser traduzido para um serviço externo somente quando essa função é utilizada.
+- **Verificação de atualização**: a aplicação só faz essa consulta se `SPEECH_SCRIBE_VERSION_URL` estiver configurada. No projeto atual, essa variável vem vazia no `.env.example`, então a checagem fica desativada por padrão.
+- **Ollama**: a integração com Ollama usa HTTP para conversar com um serviço local em `http://localhost:11434`. Isso é tráfego local entre a aplicação e o Ollama, não uma requisição para servidores externos do projeto.
+
+O código do projeto não implementa integração explícita com serviços próprios de analytics ou telemetria. Bibliotecas de terceiros podem ter comportamentos opcionais próprios, conforme sua configuração.
+
 ### 4. Configurar Diarização (Opcional)
 
 Para usar diarização (separação de oradores):
