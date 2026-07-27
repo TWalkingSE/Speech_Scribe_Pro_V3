@@ -1,0 +1,174 @@
+MIT License / Licença MIT
+
+=== ENGLISH VERSION ===
+
+Copyright (c) 2025-2026 Speech Scribe Pro V3
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+=== VERSÃO EM PORTUGUÊS BRASILEIRO ===
+
+Copyright (c) 2025-2026 Speech Scribe Pro V3
+
+É concedida permissão, gratuitamente, a qualquer pessoa que obtenha uma cópia
+deste software e arquivos de documentação associados (o "Software"), para
+lidar com o Software sem restrição, incluindo, sem limitação, os direitos de
+usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou
+vender cópias do Software, e permitir que as pessoas a quem o Software é
+fornecido o façam, sujeito às seguintes condições:
+
+O aviso de copyright acima e este aviso de permissão devem ser incluídos em
+todas as cópias ou partes substanciais do Software.
+
+O SOFTWARE É FORNECIDO "COMO ESTÁ", SEM GARANTIA DE QUALQUER TIPO, EXPRESSA
+OU IMPLÍCITA, INCLUINDO, MAS NÃO SE LIMITANDO ÀS GARANTIAS DE COMERCIALIZAÇÃO,
+ADEQUAÇÃO A UM PROPÓSITO ESPECÍFICO E NÃO VIOLAÇÃO. EM NENHUM CASO OS AUTORES
+OU DETENTORES DOS DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUALQUER
+REIVINDICAÇÃO, DANOS OU OUTRAS RESPONSABILIDADES, SEJA EM AÇÃO DE CONTRATO,
+DELITO OU DE OUTRA FORMA, DECORRENTES DE, FORA DE OU EM CONEXÃO COM O
+SOFTWARE OU O USO OU OUTRAS NEGOCIAÇÕES NO SOFTWARE.
+
+---
+
+THIRD-PARTY NOTICE / AVISO SOBRE COMPONENTES DE TERCEIROS
+
+This repository depends on third-party packages and optional external tools
+that are licensed separately from the original source code of Speech Scribe
+Pro V3. The list below is an informational notice aligned with the current
+project dependencies and documentation. It may not be exhaustive and does not
+replace the original license texts distributed by each upstream project.
+
+Direct Python dependencies currently referenced by the project:
+
+- torch and torchaudio: see the PyTorch project licensing terms
+   https://github.com/pytorch/pytorch
+- faster-whisper: MIT License
+   https://github.com/SYSTRAN/faster-whisper
+- librosa: ISC License
+   https://github.com/librosa/librosa
+- numpy: BSD 3-Clause License
+   https://github.com/numpy/numpy
+- PyQt6: GPL v3 or commercial license, depending on your distribution model
+   https://riverbankcomputing.com/software/pyqt/
+- requests: Apache License 2.0
+   https://github.com/psf/requests
+- psutil: BSD 3-Clause License
+   https://github.com/giampaolo/psutil
+- python-dotenv: BSD 3-Clause License
+   https://github.com/theskumar/python-dotenv
+- PyYAML: MIT License
+   https://github.com/yaml/pyyaml
+- deep-translator: MIT License
+   https://github.com/nidhaloff/deep-translator
+- python-docx: MIT License
+   https://github.com/python-openxml/python-docx
+- pyannote.audio: MIT License
+   https://github.com/pyannote/pyannote-audio
+- pyaudio: consult the upstream distribution terms
+   https://people.csail.mit.edu/hubert/pyaudio/
+
+Development and test dependencies referenced by the repository:
+
+- pytest: MIT License
+   https://github.com/pytest-dev/pytest
+- pytest-qt: MIT License
+   https://github.com/pytest-dev/pytest-qt
+
+Optional external tools integrated by the project, but not distributed as part
+of this repository:
+
+- Ollama
+   https://ollama.com/
+- FFmpeg
+   https://ffmpeg.org/
+
+Important distribution note:
+
+If you distribute builds that include or depend on PyQt6 under the GPL
+version, the distribution of the combined work may require GPL-compliant
+terms. If you need closed-source or commercial redistribution, review the
+licensing model of PyQt6 and every bundled dependency before distributing the
+application.
+
+For compliance-sensitive or commercial use, review the full dependency tree,
+the exact versions you ship, and the original license files of every bundled
+component.
+
+Este repositório depende de pacotes de terceiros e de ferramentas externas
+opcionais que possuem licenciamento separado do código-fonte original do
+Speech Scribe Pro V3. A lista abaixo é um aviso informativo alinhado com as
+dependências e a documentação atuais do projeto. Ela pode não ser exaustiva e
+não substitui os textos de licença originais distribuídos por cada projeto
+upstream.
+
+Dependências Python diretas atualmente referenciadas pelo projeto:
+
+- torch e torchaudio: consulte os termos de licença do projeto PyTorch
+   https://github.com/pytorch/pytorch
+- faster-whisper: Licença MIT
+   https://github.com/SYSTRAN/faster-whisper
+- librosa: Licença ISC
+   https://github.com/librosa/librosa
+- numpy: Licença BSD de 3 cláusulas
+   https://github.com/numpy/numpy
+- PyQt6: GPL v3 ou licença comercial, conforme o modelo de distribuição
+   https://riverbankcomputing.com/software/pyqt/
+- requests: Apache License 2.0
+   https://github.com/psf/requests
+- psutil: Licença BSD de 3 cláusulas
+   https://github.com/giampaolo/psutil
+- python-dotenv: Licença BSD de 3 cláusulas
+   https://github.com/theskumar/python-dotenv
+- PyYAML: Licença MIT
+   https://github.com/yaml/pyyaml
+- deep-translator: Licença MIT
+   https://github.com/nidhaloff/deep-translator
+- python-docx: Licença MIT
+   https://github.com/python-openxml/python-docx
+- pyannote.audio: Licença MIT
+   https://github.com/pyannote/pyannote-audio
+- pyaudio: consulte os termos da distribuição upstream
+   https://people.csail.mit.edu/hubert/pyaudio/
+
+Dependências de desenvolvimento e testes referenciadas pelo repositório:
+
+- pytest: Licença MIT
+   https://github.com/pytest-dev/pytest
+- pytest-qt: Licença MIT
+   https://github.com/pytest-dev/pytest-qt
+
+Ferramentas externas opcionais integradas pelo projeto, mas não distribuídas
+como parte deste repositório:
+
+- Ollama
+   https://ollama.com/
+- FFmpeg
+   https://ffmpeg.org/
+
+Observação importante sobre distribuição:
+
+Se você distribuir builds que incluam ou dependam do PyQt6 sob a versão GPL,
+a distribuição da obra combinada pode exigir termos compatíveis com a GPL. Se
+você precisa de distribuição comercial ou de código fechado, revise o modelo
+de licenciamento do PyQt6 e de cada dependência empacotada antes de
+distribuir a aplicação.
+
+Para uso comercial ou cenários sensíveis a compliance, revise a árvore
+completa de dependências, as versões exatas distribuídas e os arquivos de
+licença originais de cada componente empacotado.

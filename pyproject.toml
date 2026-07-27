@@ -1,0 +1,25 @@
+[project]
+name = "speech-scribe-pro"
+version = "3.0.0"
+description = "Aplicação desktop para transcrição de áudio/vídeo com IA"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: marca testes lentos (deselect com -m 'not slow')",
+    "gpu: marca testes que requerem GPU",
+    "integration: marca testes de integração",
+    "unit: marca testes unitários",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]

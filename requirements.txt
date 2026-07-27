@@ -1,0 +1,32 @@
+# Speech Scribe Pro V3 - Dependências
+# Instale com: pip install -r requirements.txt
+
+# ===== PYTORCH COM SUPORTE CUDA =====
+# IMPORTANTE: Instale PyTorch separadamente com o CUDA correto para sua GPU:
+#   RTX 50 / CUDA 12.8: pip install pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu128
+#   CUDA 12.1:                pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+#   CUDA 11.8:                pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Dependencias principais
+torch
+torchaudio
+faster-whisper
+librosa
+numpy
+PyQt6
+requests
+psutil
+python-dotenv
+PyYAML
+
+# Recursos integrados
+deep-translator
+python-docx
+pyannote.audio
+
+# Testes e smoke tests
+pytest
+pytest-qt
+
+# Streaming e microfone
+pyaudio
